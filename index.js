@@ -97,7 +97,7 @@ bot.on("text", async (ctx) => {
           [
             {
               text: "👥 Support Team",
-              url: "https://www.tiktok.com/@mdraju_3m"
+              url: "https://www.tiktok.com/@mdraju_3m?_r=1&_t=ZS-965HVsM1mte"
             }
           ],
           [
