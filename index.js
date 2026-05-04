@@ -33,16 +33,15 @@ bot.action("joined_check", (ctx) => {
   users.set(ctx.from.id, "joined");
 
   return ctx.reply(
-    "✅ Welcome!
+  `✅ Welcome!
 
 🇧🇩 বাংলায়:
 আপনি এখন বট ব্যবহার করতে পারবেন।
 TikTok ভিডিও ডাউনলোড করতে ভিডিও লিংক পাঠান 📥
 
 🇬🇧 English:
-You can now use the bot. Send a TikTok link to download video 📥"
-  );
-});
+You can now use the bot. Send a TikTok link to download video 📥`
+);
 
 /* ================= VIDEO API ================= */
 async function getVideo(url) {
