@@ -12,7 +12,7 @@ bot.start((ctx) => {
 
 async function getVideo(url) {
   try {
-    const api = `https://api.tiklydown.me/api/download?url=${encodeURIComponent(url)}`;
+    const api = `https://api.tikwm.com/api/?url=${encodeURIComponent(url)}`;
     const res = await axios.get(api);
     return res.data;
   } catch (e) {
