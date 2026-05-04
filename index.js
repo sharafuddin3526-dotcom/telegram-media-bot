@@ -14,14 +14,7 @@ bot.start(async (ctx) => {
   // if already joined
   if (users.get(id) === "joined") {
     return ctx.reply(
-      "✅ Welcome!
-
-🇧🇩 বাংলায়:
-আপনি এখন বট ব্যবহার করতে পারবেন।
-TikTok ভিডিও ডাউনলোড করতে ভিডিও লিংক পাঠান 📥
-
-🇬🇧 English:
-You can now use the bot. Send a TikTok link to download video 📥"
+      "✅ Welcome!\n\n🇧🇩 বাংলায়:\nআপনি এখন বট ব্যবহার করতে পারবেন।\nTikTok ভিডিও ডাউনলোড করতে ভিডিও লিংক পাঠান 📥\n\n🇬🇧 English:\nYou can now use the bot. Send a TikTok link to download video 📥"
     );
   }
 
@@ -47,7 +40,7 @@ bot.action("joined_check", async (ctx) => {
   );
 });
 
-// TIKTOK DOWNLOAD
+// TIKTOK DOWNLOAD FUNCTION (STABLE)
 async function getVideo(url) {
   try {
     const api = `https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`;
@@ -86,10 +79,14 @@ bot.on("text", async (ctx) => {
     return ctx.reply("❌ Failed to download video!");
   }
 
-  return ctx.replyWithVideo(video);
+  try {
+    return ctx.replyWithVideo(video);
+  } catch (e) {
+    return ctx.reply("❌ Error sending video!");
+  }
 });
 
-// ERROR
+// ERROR HANDLER
 bot.catch((err) => {
   console.log("Bot Error:", err);
 });
