@@ -1,7 +1,9 @@
 const { Telegraf } = require("telegraf");
 const axios = require("axios");
+const config = require("./config");
 
-const bot = new Telegraf(process.env.BOT_TOKEN);
+// use config token instead of env
+const bot = new Telegraf(config.BOT_TOKEN);
 
 // start message
 bot.start((ctx) => {
@@ -13,9 +15,7 @@ bot.start((ctx) => {
 // helper function (API call)
 async function getVideo(url) {
   try {
-    // example API (you can replace later)
     const api = `https://api.tiklydown.me/api/download?url=${encodeURIComponent(url)}`;
-
     const res = await axios.get(api);
     return res.data;
   } catch (e) {
@@ -40,6 +40,11 @@ bot.on("text", async (ctx) => {
   }
 
   return ctx.replyWithVideo(data.video);
+});
+
+// error safety (important)
+bot.catch((err) => {
+  console.log("Bot error:", err);
 });
 
 bot.launch();
