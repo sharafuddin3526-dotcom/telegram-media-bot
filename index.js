@@ -14,7 +14,14 @@ bot.start(async (ctx) => {
 
   if (users.get(id) === "joined") {
     return ctx.reply(
-      "✅ Welcome!\n\n🇧🇩 বাংলায়:\nআপনি এখন বট ব্যবহার করতে পারবেন।\nTikTok ভিডিও ডাউনলোড করতে ভিডিও লিংক পাঠান 📥\n\n🇬🇧 English:\nYou can now use the bot. Send a TikTok link to download video 📥"
+`✅ Welcome!
+
+🇧🇩 বাংলায়:
+আপনি এখন বট ব্যবহার করতে পারবেন।
+TikTok ভিডিও ডাউনলোড করতে ভিডিও লিংক পাঠান 📥
+
+🇬🇧 English:
+You can now use the bot. Send a TikTok link to download video 📥`
     );
   }
 
@@ -33,7 +40,7 @@ bot.action("joined_check", (ctx) => {
   users.set(ctx.from.id, "joined");
 
   return ctx.reply(
-  `✅ Welcome!
+`✅ Welcome!
 
 🇧🇩 বাংলায়:
 আপনি এখন বট ব্যবহার করতে পারবেন।
@@ -41,7 +48,8 @@ TikTok ভিডিও ডাউনলোড করতে ভিডিও লি
 
 🇬🇧 English:
 You can now use the bot. Send a TikTok link to download video 📥`
-);
+  );
+}); // ✅ FIXED BRACKET HERE
 
 /* ================= VIDEO API ================= */
 async function getVideo(url) {
@@ -68,7 +76,6 @@ bot.on("text", async (ctx) => {
   const id = ctx.from.id;
   const url = ctx.message.text;
 
-  // ignore commands
   if (url.startsWith("/")) return;
 
   if (users.get(id) !== "joined") {
