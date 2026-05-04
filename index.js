@@ -36,7 +36,7 @@ bot.action("joined_check", async (ctx) => {
   users.set(id, "joined");
 
   return ctx.reply(
-    "✅ Welcome!\n\n🇧🇩 বাংলায়:\nআপনি এখন বট ব্যবহার করতে পারবেন।\nTikTok ভিডিও ডাউনলোড করতে ভিডিও লিংক পাঠান 📥 Support📩 ID: @Smart_Method_Owner\n\n🇬🇧 English:\nYou can now use the bot. Send a TikTok link to download video 📥"
+    "✅ Welcome!\n\n🇧🇩 বাংলায়:\nআপনি এখন বট ব্যবহার করতে পারবেন।\nTikTok ভিডিও ডাউনলোড করতে ভিডিও লিংক পাঠান 📩\n\n🇬🇧 English:\nYou can now use the bot. Send a TikTok link to download video 📥"
   );
 });
 
