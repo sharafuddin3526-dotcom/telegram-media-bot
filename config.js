@@ -1,0 +1,3 @@
+module.exports = {
+  BOT_TOKEN: "PASTE_YOUR_TOKEN_HERE"
+};
