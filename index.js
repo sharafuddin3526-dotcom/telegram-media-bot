@@ -33,7 +33,14 @@ bot.action("joined_check", (ctx) => {
   users.set(ctx.from.id, "joined");
 
   return ctx.reply(
-    "✅ Welcome!\n\n🇧🇩 You can now use the bot\n🇬🇧 Send TikTok link to download video 📥"
+    "✅ Welcome!
+
+🇧🇩 বাংলায়:
+আপনি এখন বট ব্যবহার করতে পারবেন।
+TikTok ভিডিও ডাউনলোড করতে ভিডিও লিংক পাঠান 📥
+
+🇬🇧 English:
+You can now use the bot. Send a TikTok link to download video 📥"
   );
 });
 
