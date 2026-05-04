@@ -62,8 +62,10 @@ async function getVideo(url) {
 bot.on("text", async (ctx) => {
   const id = ctx.from.id;
   const url = ctx.message.text;
-// 🔥 ADD THIS LINE (IMPORTANT FIX)
+
+  // 🔥 FIX: ignore commands
   if (url.startsWith("/")) return;
+
   if (users.get(id) !== "joined") {
     return ctx.reply("❌ Please join first and click I Joined button!");
   }
@@ -163,24 +165,23 @@ function getRandom(type) {
   return list[Math.floor(Math.random() * list.length)];
 }
 
+// ================= CAPTION COMMAND =================
 bot.command("caption", (ctx) => {
   ctx.reply(
     "✨ Please Select Category ✨",
     Markup.inlineKeyboard([
-      [Markup.button.callback("❤️ Romanci Capt...", "cap_romantic")],
+      [Markup.button.callback("❤️ Romantic Caption", "cap_romantic")],
       [Markup.button.callback("🕌 Islamic Caption", "cap_islamic")],
       [Markup.button.callback("💔 Sad Caption", "cap_sad")],
-      [Markup.button.callback("😂 Funy Caption", "cap_funny")],
+      [Markup.button.callback("😂 Funny Caption", "cap_funny")],
       [Markup.button.callback("🔥 Other Caption", "cap_other")]
     ])
   );
 });
 
 function sendCaption(ctx, type) {
-  const text = getRandom(type);
-
   ctx.reply(
-    text,
+    getRandom(type),
     Markup.inlineKeyboard([
       [Markup.button.callback("🔄 Change Caption", `change_${type}`)]
     ])
