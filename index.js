@@ -14,7 +14,14 @@ bot.start(async (ctx) => {
   // if already joined
   if (users.get(id) === "joined") {
     return ctx.reply(
-      "👋 Welcome back!\n\nYou can now use the bot.\nSend a TikTok video link to download 📥"
+      "✅ Welcome!
+
+🇧🇩 বাংলায়:
+আপনি এখন বট ব্যবহার করতে পারবেন।
+TikTok ভিডিও ডাউনলোড করতে ভিডিও লিংক পাঠান 📥
+
+🇬🇧 English:
+You can now use the bot. Send a TikTok link to download video 📥"
     );
   }
 
