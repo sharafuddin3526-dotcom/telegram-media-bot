@@ -7,40 +7,25 @@ const bot = new Telegraf(config.BOT_TOKEN);
 // START MESSAGE
 bot.start((ctx) => {
   ctx.reply(
-    "👋 Send me TikTok / Facebook / Instagram video link\n\n📥 I will try to download it!"
+    "👋 Send me a TikTok video link\n\n📥 I will download it for you!"
   );
 });
 
-// GET VIDEO FUNCTION (MULTI API FIXED)
+// ONLY TIKTOK DOWNLOADER (STABLE VERSION)
 async function getVideo(url) {
   try {
-    // 1st API
-    const api1 = `https://tikwm.com/api/?url=${encodeURIComponent(url)}`;
-    const res1 = await axios.get(api1);
+    const api = `https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`;
+    const res = await axios.get(api);
 
-    if (res1?.data?.data?.play) {
-      return res1.data.data.play;
-    }
+    const data = res.data;
 
-    // 2nd API fallback
-    const api2 = `https://api.douyin.wtf/api?url=${encodeURIComponent(url)}`;
-    const res2 = await axios.get(api2);
-
-    if (res2?.data?.video) {
-      return res2.data.video;
-    }
-
-    // 3rd fallback (backup simple API)
-    const api3 = `https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`;
-    const res3 = await axios.get(api3);
-
-    if (res3?.data?.video) {
-      return res3.data.video;
+    if (data?.data?.play) {
+      return data.data.play; // video URL
     }
 
     return null;
   } catch (err) {
-    console.log("Download Error:", err.message);
+    console.log("Download error:", err.message);
     return null;
   }
 }
@@ -49,22 +34,23 @@ async function getVideo(url) {
 bot.on("text", async (ctx) => {
   const url = ctx.message.text;
 
-  if (!url.startsWith("http")) {
-    return ctx.reply("❌ Please send a valid video link!");
+  // only allow TikTok links
+  if (!url.includes("tiktok.com")) {
+    return ctx.reply("❌ Please send a valid TikTok link!");
   }
 
-  ctx.reply("⏳ Downloading video...");
+  ctx.reply("⏳ Downloading TikTok video...");
 
   const video = await getVideo(url);
 
   if (!video) {
-    return ctx.reply("❌ Failed to download video. Try another link!");
+    return ctx.reply("❌ Failed to download TikTok video!");
   }
 
   try {
     return ctx.replyWithVideo(video);
   } catch (e) {
-    return ctx.reply("❌ Error sending video to Telegram!");
+    return ctx.reply("❌ Error sending video!");
   }
 });
 
@@ -75,4 +61,4 @@ bot.catch((err) => {
 
 bot.launch();
 
-console.log("🚀 Bot is running...");
+console.log("🚀 TikTok Bot is running...");
