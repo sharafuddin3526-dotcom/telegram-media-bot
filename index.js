@@ -4,29 +4,22 @@ const config = require("./config");
 
 const bot = new Telegraf(config.BOT_TOKEN);
 
-// ================= MEMORY =================
+// memory
 const users = new Map();
 const userVideos = new Map();
 
-// ================= START =================
+/* ================= START ================= */
 bot.start(async (ctx) => {
   const id = ctx.from.id;
 
   if (users.get(id) === "joined") {
     return ctx.reply(
-`✅ Welcome!
-
-🇧🇩 বাংলায়:
-আপনি এখন বট ব্যবহার করতে পারবেন।
-TikTok ভিডিও ডাউনলোড করতে ভিডিও লিংক পাঠান 📥
-
-🇬🇧 English:
-You can now use the bot. Send a TikTok link to download video 📥`
+      "✅ Welcome!\n\n🇧🇩 বাংলায়:\nআপনি এখন বট ব্যবহার করতে পারবেন।\nTikTok ভিডিও ডাউনলোড করতে ভিডিও লিংক পাঠান 📩 /caption\n\n🇬🇧 English:\nYou can now use the bot. Send a TikTok link to download video 📩 /caption"
     );
   }
 
   return ctx.reply(
-    "👋 Welcome!\n\nPlease join our channels to use the bot:",
+    "👋 Welcome!\n\nPlease join our channels:",
     Markup.inlineKeyboard([
       [Markup.button.url("🌍 Global Channel", "https://t.me/Global_Method_Channel")],
       [Markup.button.url("🆘 Support Owner", "https://t.me/Smart_Method_Owner")],
@@ -35,24 +28,16 @@ You can now use the bot. Send a TikTok link to download video 📥`
   );
 });
 
-// ================= JOIN =================
-bot.action("joined_check", async (ctx) => {
-  const id = ctx.from.id;
-  users.set(id, "joined");
+/* ================= JOIN ================= */
+bot.action("joined_check", (ctx) => {
+  users.set(ctx.from.id, "joined");
 
   return ctx.reply(
-`✅ Welcome!
-
-🇧🇩 বাংলায়:
-আপনি এখন বট ব্যবহার করতে পারবেন।
-TikTok ভিডিও ডাউনলোড করতে ভিডিও লিংক পাঠান 📥
-
-🇬🇧 English:
-You can now use the bot. Send a TikTok link to download video 📥`
+    "✅ Joined Successfully!\n\n🇧🇩 আপনি এখন বট ব্যবহার করতে পারবেন /caption\n🇬🇧 You can now use the bot\n\nSend TikTok link 📩"
   );
 });
 
-// ================= TIKTOK API =================
+/* ================= TIKTOK API ================= */
 async function getVideo(url) {
   try {
     const api = `https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`;
@@ -66,32 +51,32 @@ async function getVideo(url) {
     }
 
     return null;
-  } catch (err) {
-    console.log("Download error:", err.message);
+  } catch (e) {
+    console.log(e.message);
     return null;
   }
 }
 
-// ================= MESSAGE =================
+/* ================= VIDEO HANDLER ================= */
 bot.on("text", async (ctx) => {
   const id = ctx.from.id;
-  const url = ctx.message.text;
+  const text = ctx.message.text;
 
-  if (url.startsWith("/")) return;
+  if (text.startsWith("/")) return; // IMPORTANT FIX
 
   if (users.get(id) !== "joined") {
     return ctx.reply("❌ Please join first!");
   }
 
-  if (!url.includes("tiktok.com")) {
-    return ctx.reply("❌ Invalid TikTok link!");
+  if (!text.includes("tiktok.com")) {
+    return ctx.reply("❌ Send valid TikTok link!");
   }
 
   ctx.reply("⏳ Downloading...");
 
-  const data = await getVideo(url);
+  const data = await getVideo(text);
 
-  if (!data?.video) {
+  if (!data) {
     return ctx.reply("❌ Failed!");
   }
 
@@ -101,163 +86,156 @@ bot.on("text", async (ctx) => {
     { url: data.video },
     {
       caption:
-`📥 Download Completed Successfully!
-🎬 Video ready to watch & save.
-
-🎧 Want MP3? Use button below.`,
+        "📥 Download Completed Successfully!\n🎬 Ready to save\n🎧 Need MP3? click button",
       reply_markup: {
         inline_keyboard: [
-          [{ text: "📩 Support ID", url: "https://t.me/Smart_Method_Owner" }],
-          [{ text: "👥 Support Team", url: "https://www.tiktok.com/@mdraju_3m" }],
-          [{ text: "🟢 Need MP3", callback_data: "get_mp3" }]
+          [{ text: "📩 Support", url: "https://t.me/Smart_Method_Owner" }],
+          [{ text: "🟢 MP3", callback_data: "mp3" }]
         ]
       }
     }
   );
 });
 
-// ================= MP3 =================
-bot.action("get_mp3", async (ctx) => {
+/* ================= MP3 ================= */
+bot.action("mp3", (ctx) => {
   const data = userVideos.get(ctx.from.id);
 
   if (!data?.audio) {
-    return ctx.reply("❌ No audio found!");
+    return ctx.reply("❌ No audio found");
   }
 
-  return ctx.replyWithAudio(
-    { url: data.audio },
-    { caption: "🎧 MP3 Ready!" }
-  );
+  return ctx.replyWithAudio({ url: data.audio });
 });
 
-// ================= CAPTION LIBRARY (20 EACH) =================
+/* ================= CAPTION LIBRARY (20x EACH) ================= */
+
 const captions = {
   romantic: [
-    "তুমি আমার পৃথিবী ❤️ #Love",
-    "ভালোবাসা মানে তুমি 💖 #Romantic",
-    "তোমার হাসি আমার সুখ 😊 #Couple",
-    "তুমি ছাড়া আমি শূন্য 💔 #Love",
-    "তুমি আমার সব 💑 #Forever",
-    "তুমি থাকলেই ভালো লাগে ❤️ #Relationship",
-    "আমার হৃদয় তোমার জন্য 💖 #Heart",
-    "চিরকাল তুমি 💕 #LoveStory",
-    "তুমি আমার স্বপ্ন 🌹 #Dream",
-    "ভালোবাসা অনন্ত ❤️ #TrueLove",
-    "তুমি আমার শান্তি 💖 #Peace",
-    "একসাথে সব 💑 #Together",
-    "তুমি আমার হাসি 😊 #Smile",
-    "তুমি আমার জীবন ❤️ #Life",
-    "ভালোবাসা গভীর 💕 #DeepLove",
-    "তুমি ছাড়া কিছু না 💔 #Empty",
-    "তুমি আমার রোদ ☀️ #Sunshine",
-    "চিরকাল একসাথে 💑 #Forever",
-    "তুমি আমার অনুভব ❤️ #Feelings",
-    "তুমি আমার গল্প 📖 #Story"
+    "তুমি আমার ভালোবাসা ❤️ #Love",
+    "তুমি ছাড়া কিছুই না 💖 #Romantic",
+    "তুমি আমার পৃথিবী 🌍 #Couple",
+    "তোমাকে ছাড়া অসম্পূর্ণ 😍 #Heart",
+    "তুমি আমার হাসির কারণ 😊 #Love",
+    "ভালোবাসা মানে তুমি ❤️",
+    "তুমি আমার স্বপ্ন 💭",
+    "তোমায় ছাড়া কিছুই ভালো লাগে না 💕",
+    "তুমি আমার শান্তি 🌸",
+    "আমার সবকিছু তুমি 💞",
+    "Forever with you 💑",
+    "You are my life ❤️",
+    "My heart beats for you 💓",
+    "Love you endlessly 💘",
+    "You complete me 💍",
+    "Only you ❤️",
+    "My soulmate 💖",
+    "Together forever 💞",
+    "Pure love ❤️",
+    "You + Me = ❤️"
   ],
 
   islamic: [
-    "আল্লাহই যথেষ্ট 🤍 #Islam",
-    "সবর করো 🌙 #Sabr",
-    "আল্লাহর উপর ভরসা রাখো 🤲 #Faith",
-    "দোয়া কখনো বিফলে যায় না 💖 #Dua",
-    "সব কিছু আল্লাহর হাতে 🕌 #Trust",
-    "আল্লাহ সাহায্য করবেন 🤍 #Hope",
-    "ইমান শক্তি 💖 #Iman",
-    "আল্লাহর রহমত অসীম 🌙 #Mercy",
-    "সঠিক পথে চলো 🕌 #Deen",
-    "ধৈর্য ধরো 🤲 #Patience",
-    "আল্লাহ কখনো ছাড়েন না 💖 #Allah",
-    "দোয়া করো 🤲 #Prayer",
-    "আল্লাহ বড় 🤍 #Great",
-    "জীবন আল্লাহর দান 🕌 #Life",
-    "ভয় করো না 🤲 #Trust",
-    "আল্লাহ আছেন 💖 #Belief",
-    "হালাল পথে চলো 🕌 #Halal",
-    "আল্লাহর উপর আশা 🤍 #Hope",
-    "সবরের ফল মিষ্টি 🌙 #Sabr",
-    "দোয়া শক্তি 🤲 #Dua"
+    "আল্লাহই যথেষ্ট 🤍",
+    "সব আল্লাহর ইচ্ছা ✨",
+    "ধৈর্য ধরো 🌙",
+    "দোয়া কখনো ব্যর্থ নয় 🤲",
+    "আল্লাহর উপর ভরসা 💖",
+    "Sabr is beautiful 🌙",
+    "Allah knows best 🤍",
+    "Trust Allah ✨",
+    "Stay patient 🤲",
+    "Faith over fear 💖",
+    "আল্লাহর রহমত অসীম",
+    "দোয়া করো 🤲",
+    "ইনশাআল্লাহ ✨",
+    "আলহামদুলিল্লাহ 🤍",
+    "সবর করো 🌙",
+    "আল্লাহ সব দেখেন 👀",
+    "Faith is power 💖",
+    "Jannah awaits 🌙",
+    "Stay blessed 🤲",
+    "Remember Allah 🤍"
   ],
 
   sad: [
-    "হাসির আড়ালে কষ্ট 💔 #Sad",
-    "সবাই বদলে যায় 😔 #Alone",
-    "মনটা ভেঙে গেছে 💔 #Broken",
-    "আমি ঠিক নেই 😢 #Pain",
-    "ভালো নেই 💔 #MoodOff",
-    "কেউ বোঝে না 😔 #Lonely",
-    "কষ্ট লুকানো অভ্যাস 💔 #Painful",
-    "ভালোবাসা ব্যথা দেয় 😢 #LoveHurts",
-    "একাকীত্ব সত্য 💔 #AloneLife",
-    "সব শেষ 😔 #End",
-    "হৃদয় ভেঙে গেছে 💔 #HeartBreak",
-    "আমি ক্লান্ত 😢 #Tired",
-    "সব মিথ্যা 💔 #Fake",
-    "কেউ নেই 😔 #Empty",
-    "কষ্ট বাস্তব 💔 #Reality",
-    "হাসি মিথ্যা 😢 #FakeSmile",
-    "আমি একা 💔 #Lonely",
-    "সব হারিয়ে গেছে 😔 #Lost",
-    "মন খারাপ 💔 #SadMood",
-    "ভালো লাগছে না 😢 #Down"
+    "কষ্ট লুকানো হাসি 💔",
+    "সবাই পাশে নেই 😔",
+    "একাকীত্ব কষ্ট দেয় 💔",
+    "ভালোবাসা ব্যথা দেয় 😢",
+    "হারিয়ে যাওয়া অনুভূতি 💔",
+    "Broken inside 😢",
+    "Nobody cares 💔",
+    "Pain is real 😔",
+    "Silent tears 😢",
+    "Lost feelings 💔",
+    "I am alone 💔",
+    "Heart broken 💔",
+    "No happiness 😢",
+    "Empty soul 💔",
+    "Sad life 😔",
+    "Pain never ends 💔",
+    "Crying inside 😢",
+    "Broken trust 💔",
+    "Alone forever 😔",
+    "No one understands 💔"
   ],
 
   funny: [
-    "জীবন মজা 😂 #Funny",
-    "আমি পাগল 🤪 #Crazy",
-    "হাসি থামে না 😂 #LOL",
-    "আজ গন্ডগোল 🤣 #Chaos",
-    "মজা লাগছে 😂 #Fun",
-    "আমি সিরিয়াস না 🤪 #Joke",
-    "সবই ফানি 😂 #FunnyLife",
-    "হাসতে থাকো 🤣 #Smile",
-    "আমি হারিয়ে যাই 😂 #Lost",
-    "মাথা নষ্ট 🤪 #CrazyLife",
-    "দুনিয়া গোল 😂 #World",
-    "হাসি লাগছে 🤣 #LOL",
-    "জীবন সহজ না 😂 #Life",
-    "আমি স্টুপিড 🤪 #Funny",
-    "আজ মজা 😂 #FunDay",
-    "হাসির শেষ নেই 🤣 #Laugh",
-    "আমি অদ্ভুত 😂 #Weird",
-    "সব মজা 🤪 #Enjoy",
-    "চিল 😂 #Chill",
-    "হাসি দরকার 🤣 #Happy"
+    "জীবনটা মজা 😂",
+    "আমি আর আমার লাক 🤣",
+    "হাসতে থাকো 😆",
+    "মাথা গরম 🤪",
+    "LOL জীবন 😂",
+    "Funny mood 😆",
+    "Crazy life 🤣",
+    "No tension 😂",
+    "Just joke 😆",
+    "Haha 😂",
+    "Life = meme 🤣",
+    "Fun mode 😆",
+    "Too funny 😂",
+    "Laugh loud 🤣",
+    "Crazy brain 🤪",
+    "No sense 😂",
+    "Funny me 😆",
+    "Jokes only 🤣",
+    "Haha world 😂",
+    "Enjoy life 😆"
   ],
 
   other: [
-    "Just vibes ✨ #Vibes",
-    "Stay strong 💪 #Strong",
-    "Dream big 🌟 #Goals",
-    "Keep going 🚀 #Success",
-    "No limits 🔥 #Power",
-    "Stay real 💯 #Real",
-    "Be yourself 💫 #Unique",
-    "Smile 😊 #Happy",
-    "Enjoy life 🌿 #Life",
-    "Focus 🎯 #Focus",
-    "Believe 🌟 #Believe",
-    "Work hard ⚡ #HardWork",
-    "Chill 😎 #Relax",
-    "Positive ✨ #Positive",
-    "Energy ⚡ #Energy",
-    "Success 🚀 #Win",
-    "Motivation 💪 #Motivate",
-    "Peace 🌿 #Peace",
-    "Love ❤️ #Love",
-    "Life 🌍 #Life"
+    "Just vibes ✨",
+    "Stay strong 💪",
+    "Keep going 🚀",
+    "Dream big 🌟",
+    "No limits 🔥",
+    "Be real 💯",
+    "Chill 😎",
+    "Focus 🎯",
+    "Motivation ⚡",
+    "Life goes on 🌍",
+    "Stay positive 😊",
+    "Never stop 🚀",
+    "Work hard 💪",
+    "Believe ✨",
+    "Success 🔥",
+    "Energy ⚡",
+    "Smile 😊",
+    "Peace ✌️",
+    "Rise up 🚀",
+    "Keep fighting 💪"
   ]
 };
 
-// random
 function getRandom(type) {
   const list = captions[type];
   return list[Math.floor(Math.random() * list.length)];
 }
 
-// ================= CAPTION COMMAND =================
+/* ================= CAPTION COMMAND FIX ================= */
 bot.command("caption", (ctx) => {
-  ctx.reply(
-    "✨ Select Category",
+  return ctx.reply(
+    "✨ Please Select Category ✨",
     Markup.inlineKeyboard([
       [Markup.button.callback("❤️ Romantic", "cap_romantic")],
       [Markup.button.callback("🕌 Islamic", "cap_islamic")],
@@ -268,8 +246,9 @@ bot.command("caption", (ctx) => {
   );
 });
 
-function sendCaption(ctx, type) {
-  ctx.reply(
+/* ================= CAPTION ACTION ================= */
+function send(ctx, type) {
+  return ctx.reply(
     getRandom(type),
     Markup.inlineKeyboard([
       [Markup.button.callback("🔄 Change", `change_${type}`)]
@@ -277,20 +256,20 @@ function sendCaption(ctx, type) {
   );
 }
 
-bot.action("cap_romantic", (ctx) => sendCaption(ctx, "romantic"));
-bot.action("cap_islamic", (ctx) => sendCaption(ctx, "islamic"));
-bot.action("cap_sad", (ctx) => sendCaption(ctx, "sad"));
-bot.action("cap_funny", (ctx) => sendCaption(ctx, "funny"));
-bot.action("cap_other", (ctx) => sendCaption(ctx, "other"));
+bot.action("cap_romantic", (ctx) => send(ctx, "romantic"));
+bot.action("cap_islamic", (ctx) => send(ctx, "islamic"));
+bot.action("cap_sad", (ctx) => send(ctx, "sad"));
+bot.action("cap_funny", (ctx) => send(ctx, "funny"));
+bot.action("cap_other", (ctx) => send(ctx, "other"));
 
-bot.action("change_romantic", (ctx) => sendCaption(ctx, "romantic"));
-bot.action("change_islamic", (ctx) => sendCaption(ctx, "islamic"));
-bot.action("change_sad", (ctx) => sendCaption(ctx, "sad"));
-bot.action("change_funny", (ctx) => sendCaption(ctx, "funny"));
-bot.action("change_other", (ctx) => sendCaption(ctx, "other"));
+bot.action("change_romantic", (ctx) => send(ctx, "romantic"));
+bot.action("change_islamic", (ctx) => send(ctx, "islamic"));
+bot.action("change_sad", (ctx) => send(ctx, "sad"));
+bot.action("change_funny", (ctx) => send(ctx, "funny"));
+bot.action("change_other", (ctx) => send(ctx, "other"));
 
-// ================= RUN =================
-bot.catch((err) => console.log(err));
+/* ================= ERROR ================= */
+bot.catch((e) => console.log(e));
 
 bot.launch();
 console.log("🚀 Bot Running...");
