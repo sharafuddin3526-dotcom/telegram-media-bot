@@ -1,26 +1,53 @@
-const { Telegraf } = require("telegraf");
+const { Telegraf, Markup } = require("telegraf");
 const axios = require("axios");
 const config = require("./config");
 
 const bot = new Telegraf(config.BOT_TOKEN);
 
-// START MESSAGE
-bot.start((ctx) => {
-  ctx.reply(
-    "👋 Send me a TikTok video link\n\n📥 I will download it for you!"
+// simple memory (temporary)
+const users = new Map();
+
+// START
+bot.start(async (ctx) => {
+  const id = ctx.from.id;
+
+  // if already joined
+  if (users.get(id) === "joined") {
+    return ctx.reply(
+      "👋 Welcome back!\n\nYou can now use the bot.\nSend a TikTok video link to download 📥"
+    );
+  }
+
+  // first time → show buttons
+  return ctx.reply(
+    "👋 Welcome!\n\nPlease join our channels to use the bot:",
+    Markup.inlineKeyboard([
+      [Markup.button.url("🌍 Global Channel", "https://t.me/Global_Method_Channel")],
+      [Markup.button.url("🆘 Support Owner", "https://t.me/Smart_Method_Owner")],
+      [Markup.button.callback("✅ I Joined", "joined_check")]
+    ])
   );
 });
 
-// ONLY TIKTOK DOWNLOADER (STABLE VERSION)
+// JOIN CHECK
+bot.action("joined_check", async (ctx) => {
+  const id = ctx.from.id;
+
+  users.set(id, "joined");
+
+  return ctx.reply(
+    "✅ Welcome!\n\n🇧🇩 বাংলায়:\nআপনি এখন বট ব্যবহার করতে পারবেন।\nTikTok ভিডিও ডাউনলোড করতে ভিডিও লিংক পাঠান 📥\n\n🇬🇧 English:\nYou can now use the bot. Send a TikTok link to download video 📥"
+  );
+});
+
+// TIKTOK DOWNLOAD
 async function getVideo(url) {
   try {
     const api = `https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`;
     const res = await axios.get(api);
 
-    const data = res.data;
-
-    if (data?.data?.play) {
-      return data.data.play; // video URL
+    if (res?.data?.data?.play) {
+      return res.data.data.play;
     }
 
     return null;
@@ -32,9 +59,14 @@ async function getVideo(url) {
 
 // MESSAGE HANDLER
 bot.on("text", async (ctx) => {
+  const id = ctx.from.id;
   const url = ctx.message.text;
 
-  // only allow TikTok links
+  // block if not joined
+  if (users.get(id) !== "joined") {
+    return ctx.reply("❌ Please join first and click I Joined button!");
+  }
+
   if (!url.includes("tiktok.com")) {
     return ctx.reply("❌ Please send a valid TikTok link!");
   }
@@ -44,21 +76,17 @@ bot.on("text", async (ctx) => {
   const video = await getVideo(url);
 
   if (!video) {
-    return ctx.reply("❌ Failed to download TikTok video!");
+    return ctx.reply("❌ Failed to download video!");
   }
 
-  try {
-    return ctx.replyWithVideo(video);
-  } catch (e) {
-    return ctx.reply("❌ Error sending video!");
-  }
+  return ctx.replyWithVideo(video);
 });
 
-// ERROR HANDLER
+// ERROR
 bot.catch((err) => {
   console.log("Bot Error:", err);
 });
 
 bot.launch();
 
-console.log("🚀 TikTok Bot is running...");
+console.log("🚀 Bot is running...");
