@@ -62,7 +62,8 @@ async function getVideo(url) {
 bot.on("text", async (ctx) => {
   const id = ctx.from.id;
   const url = ctx.message.text;
-
+// 🔥 ADD THIS LINE (IMPORTANT FIX)
+  if (url.startsWith("/")) return;
   if (users.get(id) !== "joined") {
     return ctx.reply("❌ Please join first and click I Joined button!");
   }
