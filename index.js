@@ -31,7 +31,7 @@ async function getVideo(url) {
     }
 
     // 3rd fallback (backup simple API)
-    const api3 = `https://api.tiklydown.me/api/download?url=${encodeURIComponent(url)}`;
+    const api3 = `https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`;
     const res3 = await axios.get(api3);
 
     if (res3?.data?.video) {
