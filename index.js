@@ -11,22 +11,36 @@ bot.start((ctx) => {
   );
 });
 
-// GET VIDEO FUNCTION (FIXED + WORKING)
+// GET VIDEO FUNCTION (MULTI API FIXED)
 async function getVideo(url) {
   try {
-    const api = `https://api.tikwm.com/api/?url=${encodeURIComponent(url)}`;
-    const res = await axios.get(api);
+    // 1st API
+    const api1 = `https://tikwm.com/api/?url=${encodeURIComponent(url)}`;
+    const res1 = await axios.get(api1);
 
-    const data = res.data;
+    if (res1?.data?.data?.play) {
+      return res1.data.data.play;
+    }
 
-    // TikTok video link extract
-    if (data?.data?.play) {
-      return data.data.play;
+    // 2nd API fallback
+    const api2 = `https://api.douyin.wtf/api?url=${encodeURIComponent(url)}`;
+    const res2 = await axios.get(api2);
+
+    if (res2?.data?.video) {
+      return res2.data.video;
+    }
+
+    // 3rd fallback (backup simple API)
+    const api3 = `https://api.tiklydown.me/api/download?url=${encodeURIComponent(url)}`;
+    const res3 = await axios.get(api3);
+
+    if (res3?.data?.video) {
+      return res3.data.video;
     }
 
     return null;
   } catch (err) {
-    console.log("API Error:", err.message);
+    console.log("Download Error:", err.message);
     return null;
   }
 }
