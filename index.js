@@ -4,49 +4,46 @@ const config = require("./config");
 
 const bot = new Telegraf(config.BOT_TOKEN);
 
-// simple memory (temporary)
+// memory
 const users = new Map();
-
-// temporary store for last video
 const userVideos = new Map();
 
-// START
+/* ================= START ================= */
 bot.start(async (ctx) => {
   const id = ctx.from.id;
 
   if (users.get(id) === "joined") {
     return ctx.reply(
-      "тЬЕ Welcome!\n\nЁЯЗзЁЯЗй ржмрж╛ржВрж▓рж╛рзЯ:\nржЖржкржирж┐ ржПржЦржи ржмржЯ ржмрзНржпржмрж╣рж╛рж░ ржХрж░рждрзЗ ржкрж╛рж░ржмрзЗржиред\nTikTok ржнрж┐ржбрж┐ржУ ржбрж╛ржЙржирж▓рзЛржб ржХрж░рждрзЗ ржнрж┐ржбрж┐ржУ рж▓рж┐ржВржХ ржкрж╛ржарж╛ржи ЁЯУе\n\nЁЯЗмЁЯЗз English:\nYou can now use the bot. Send a TikTok link to download video ЁЯУе"
+      "✅ Welcome!\n\n🇧🇩 বাংলায়:\nআপনি এখন বট ব্যবহার করতে পারবেন।\nTikTok ভিডিও ডাউনলোড করতে ভিডিও লিংক পাঠান 📥\n\n🇬🇧 English:\nYou can now use the bot. Send a TikTok link to download video 📥"
     );
   }
 
   return ctx.reply(
-    "ЁЯСЛ Welcome!\n\nPlease join our channels to use the bot:",
+    "👋 Welcome!\n\nPlease join our channels to use the bot:",
     Markup.inlineKeyboard([
-      [Markup.button.url("ЁЯМН Global Channel", "https://t.me/Global_Method_Channel")],
-      [Markup.button.url("ЁЯЖШ Support Owner", "https://t.me/Smart_Method_Owner")],
-      [Markup.button.callback("тЬЕ I Joined", "joined_check")]
+      [Markup.button.url("🌍 Global Channel", "https://t.me/Global_Method_Channel")],
+      [Markup.button.url("🆘 Support Owner", "https://t.me/Smart_Method_Owner")],
+      [Markup.button.callback("✅ I Joined", "joined_check")]
     ])
   );
 });
 
-// JOIN CHECK
-bot.action("joined_check", async (ctx) => {
-  const id = ctx.from.id;
-  users.set(id, "joined");
+/* ================= JOIN ================= */
+bot.action("joined_check", (ctx) => {
+  users.set(ctx.from.id, "joined");
 
   return ctx.reply(
-    "тЬЕ Welcome!\n\nЁЯЗзЁЯЗй ржмрж╛ржВрж▓рж╛рзЯ:\nржЖржкржирж┐ ржПржЦржи ржмржЯ ржмрзНржпржмрж╣рж╛рж░ ржХрж░рждрзЗ ржкрж╛рж░ржмрзЗржиред\nTikTok ржнрж┐ржбрж┐ржУ ржбрж╛ржЙржирж▓рзЛржб ржХрж░рждрзЗ ржнрж┐ржбрж┐ржУ рж▓рж┐ржВржХ ржкрж╛ржарж╛ржи ЁЯУй\n\nЁЯЗмЁЯЗз English:\nYou can now use the bot. Send a TikTok link to download video ЁЯУе"
+    "✅ Welcome!\n\n🇧🇩 You can now use the bot\n🇬🇧 Send TikTok link to download video 📥"
   );
 });
 
-// GET VIDEO + AUDIO
+/* ================= VIDEO API ================= */
 async function getVideo(url) {
   try {
     const api = `https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`;
     const res = await axios.get(api);
 
-    if (res?.data?.data) {
+    if (res?.data?.data?.play) {
       return {
         video: res.data.data.play,
         audio: res.data.data.music
@@ -60,81 +57,67 @@ async function getVideo(url) {
   }
 }
 
-// MESSAGE HANDLER
+/* ================= MESSAGE HANDLER ================= */
 bot.on("text", async (ctx) => {
   const id = ctx.from.id;
   const url = ctx.message.text;
 
+  // ignore commands
+  if (url.startsWith("/")) return;
+
   if (users.get(id) !== "joined") {
-    return ctx.reply("тЭМ Please join first and click I Joined button!");
+    return ctx.reply("❌ Please join first and click I Joined button!");
   }
 
   if (!url.includes("tiktok.com")) {
-    return ctx.reply("тЭМ Please send a valid TikTok link!");
+    return ctx.reply("❌ Please send a valid TikTok link!");
   }
 
-  ctx.reply("тП│ Downloading TikTok video...");
+  ctx.reply("⏳ Downloading TikTok video...");
 
   const data = await getVideo(url);
 
-  if (!data || !data.video) {
-    return ctx.reply("тЭМ Failed to download video!");
+  if (!data?.video) {
+    return ctx.reply("❌ Failed to download video!");
   }
 
-  // save for mp3
   userVideos.set(id, data);
 
   return ctx.replyWithVideo(
     { url: data.video },
     {
       caption:
-        "ЁЯУе Download Completed Successfully!\nЁЯОм Your video is ready to watch and save.\n\nЁЯОз Want only the audio (MP3)?\nTap the ЁЯЯв Need MP3 button below to download music.",
+        "📥 Download Completed Successfully!\n🎬 Your video is ready to watch and save.\n\n🎧 Want only MP3? Click button below",
       reply_markup: {
         inline_keyboard: [
-          [
-            { text: "ЁЯУй Support ID тЬЕ", url: "https://t.me/Smart_Method_Owner" }
-          ],
-          [
-            {
-              text: "ЁЯСе Support Team",
-              url: "https://www.tiktok.com/@mdraju_3m?_r=1&_t=ZS-965HVsM1mte"
-            }
-          ],
-          [
-            { text: "ЁЯЯв Need MP3", callback_data: "get_mp3" }
-          ]
+          [{ text: "📩 Support ID", url: "https://t.me/Smart_Method_Owner" }],
+          [{ text: "👥 Support Team", url: "https://www.tiktok.com/@mdraju_3m" }],
+          [{ text: "🟢 Need MP3", callback_data: "get_mp3" }]
         ]
       }
     }
   );
 });
 
-// MP3 BUTTON
+/* ================= MP3 ================= */
 bot.action("get_mp3", async (ctx) => {
-  const id = ctx.from.id;
-  const data = userVideos.get(id);
+  const data = userVideos.get(ctx.from.id);
 
-  if (!data || !data.audio) {
-    return ctx.reply("тЭМ No audio found! Send video again.");
+  if (!data?.audio) {
+    return ctx.reply("❌ No audio found! Send video again.");
   }
 
-  try {
-    return ctx.replyWithAudio(
-      { url: data.audio },
-      {
-        caption: "ЁЯОз MP3 Downloaded Successfully!"
-      }
-    );
-  } catch (e) {
-    return ctx.reply("тЭМ Failed to send MP3!");
-  }
+  return ctx.replyWithAudio(
+    { url: data.audio },
+    {
+      caption: "🎧 MP3 Downloaded Successfully!"
+    }
+  );
 });
 
-// ERROR
-bot.catch((err) => {
-  console.log("Bot Error:", err);
-});
+/* ================= ERROR ================= */
+bot.catch((err) => console.log("Bot Error:", err));
 
 bot.launch();
 
-console.log("ЁЯЪА Bot is running...");
+console.log("🚀 Bot is running...");
