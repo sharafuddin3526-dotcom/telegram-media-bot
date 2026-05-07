@@ -29,7 +29,7 @@ You can now use the bot. Send a TikTok link to download video 📥`
     "👋 Welcome!\n\nPlease join our channels to use the bot:",
     Markup.inlineKeyboard([
       [Markup.button.url("🌍 Global Channel", "https://t.me/Global_Method_Channel")],
-      [Markup.button.url("🆘 Support Owner", "https://t.me/Smart_Method_Owner")],
+      [Markup.button.url("📩 Support Owner", "https://t.me/Smart_Method_Owner")],
       [Markup.button.callback("✅ I Joined", "joined_check")]
     ])
   );
